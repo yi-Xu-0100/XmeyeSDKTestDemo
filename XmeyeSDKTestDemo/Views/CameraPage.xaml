@@ -1,0 +1,70 @@
+<Page x:Class="XmeyeSDKTestDemo.Views.CameraPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:viewModels="clr-namespace:XmeyeSDKTestDemo.ViewModels"
+      Title="参数页面"
+      d:DataContext="{d:DesignInstance Type=viewModels:CameraPageViewModel}"
+      d:DesignWidth="1920"
+      mc:Ignorable="d">
+
+  <StackPanel Margin="0,24,0,24">
+    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+      <ui:TextBlock Margin="0,8,8,8"
+                    VerticalAlignment="Center"
+                    FontTypography="BodyStrong"
+                    Text="A相机(上方定位+识别)"
+                    TextAlignment="Center" />
+      <ui:Button Margin="0,8,8,8"
+                 Appearance="{Binding IsACameraOpenAppearance}"
+                 Command="{Binding SetACameraCommand}"
+                 Icon="{ui:SymbolIcon Video24}" />
+      <ui:Button Command="{Binding LoadAFrameFromFileCommand}" Content="从文件加载" />
+    </StackPanel>
+    <ui:CardControl Margin="0,0,0,12">
+      <ui:CardControl.Header>
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"
+                           MinHeight="300"
+                           MaxHeight="600" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <Grid Grid.Row="0" Margin="1">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0"
+                   MinHeight="300"
+                   MaxHeight="600"
+                   Source="{Binding CurrentAFrame}"
+                   Stretch="Uniform" />
+            <Image Grid.Column="1"
+                   MinHeight="300"
+                   MaxHeight="600"
+                   Source="{Binding CurrentAResultFrame}"
+                   Stretch="Uniform" />
+
+          </Grid>
+          <StackPanel Grid.Row="1"
+                      Height="50"
+                      Margin="5"
+                      VerticalAlignment="Center"
+                      Orientation="Horizontal">
+            <TextBlock Margin="5"
+                       VerticalAlignment="Center"
+                       Text="识别结果:" />
+            <TextBlock Width="Auto"
+                       MinWidth="300"
+                       VerticalAlignment="Center"
+                       Text="{Binding CurrentAResult}" />
+            <Button Content="识别" />
+          </StackPanel>
+        </Grid>
+      </ui:CardControl.Header>
+    </ui:CardControl>
+  </StackPanel>
+</Page>
