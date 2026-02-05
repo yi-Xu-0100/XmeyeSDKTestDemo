@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,5 +38,11 @@ public static partial class AppHelper
         where T : class
     {
         return Host.Services.GetRequiredService<T>();
+    }
+    public static string GetDescription(this Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+        var attr = field?.GetCustomAttribute<DescriptionAttribute>();
+        return attr?.Description ?? value.ToString();
     }
 }

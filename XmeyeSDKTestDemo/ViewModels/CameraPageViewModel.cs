@@ -1,49 +1,275 @@
+using System.Windows.Input;
+using System.Windows.Media.Imaging;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using System.Windows.Input;
-using Wpf.Ui;
+using Moyu.LogExtensions.LogHelpers;
+using User.NetSDK;
+using XmeyeSDKTestDemo.Helpers;
+using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.XmeyeService;
 
 namespace XmeyeSDKTestDemo.ViewModels;
 
 public partial class CameraPageViewModel : ViewModelBase
 {
     private readonly ILogger<CameraPageViewModel> _logger;
-    private readonly ISnackbarService _snackbarService;
+
+    [ObservableProperty]
+    private Dictionary<string, long> _latestReceiveFrameIndex = [];
+
+    [ObservableProperty]
+    private Dictionary<string, long> _latestIReceiveFrameIndex = [];
 
     /// <inheritdoc/>
-    public CameraPageViewModel(ISnackbarService snackbarService, ILogger<CameraPageViewModel> logger)
+    public CameraPageViewModel(ILogger<CameraPageViewModel> logger)
     {
         _logger = logger;
-        _snackbarService = snackbarService;
     }
 
     private System.Windows.Media.ImageSource currentAResultFrame;
 
-    public System.Windows.Media.ImageSource CurrentAResultFrame { get => currentAResultFrame; set => SetProperty(ref currentAResultFrame, value); }
+    public System.Windows.Media.ImageSource CurrentAResultFrame
+    {
+        get => currentAResultFrame;
+        set => SetProperty(ref currentAResultFrame, value);
+    }
 
-    private System.Windows.Media.ImageSource currentAFrame;
+    private WriteableBitmap _currentAFrame;
 
-    public System.Windows.Media.ImageSource CurrentAFrame { get => currentAFrame; set => SetProperty(ref currentAFrame, value); }
+    public WriteableBitmap CurrentAFrame
+    {
+        get { return _currentAFrame; }
+        set
+        {
+            SetProperty(ref _currentAFrame, value);
+            OnPropertyChanged(nameof(CurrentAFrame));
+        }
+    }
 
     private Wpf.Ui.Controls.ControlAppearance isACameraOpenAppearance;
 
-    public Wpf.Ui.Controls.ControlAppearance IsACameraOpenAppearance { get => isACameraOpenAppearance; set => SetProperty(ref isACameraOpenAppearance, value); }
+    public Wpf.Ui.Controls.ControlAppearance IsACameraOpenAppearance
+    {
+        get => isACameraOpenAppearance;
+        set => SetProperty(ref isACameraOpenAppearance, value);
+    }
 
     private string currentAResult;
 
-    public string CurrentAResult { get => currentAResult; set => SetProperty(ref currentAResult, value); }
+    public string CurrentAResult
+    {
+        get => currentAResult;
+        set => SetProperty(ref currentAResult, value);
+    }
 
-    private RelayCommand setACameraCommand;
-    public ICommand SetACameraCommand => setACameraCommand ??= new RelayCommand(SetACamera);
-
+    [RelayCommand]
     private void SetACamera()
     {
+        StartCameraLoop("相机A");
     }
 
     private RelayCommand loadAFrameFromFileCommand;
     public ICommand LoadAFrameFromFileCommand => loadAFrameFromFileCommand ??= new RelayCommand(LoadAFrameFromFile);
 
-    private void LoadAFrameFromFile()
+    private void LoadAFrameFromFile() { }
+
+    #region Camera Parse Loop
+
+    private readonly Dictionary<string, CameraLoopContext> _cameraLoops = new();
+    private readonly object _lock = new();
+
+    private class CameraLoopContext
     {
+        public CancellationTokenSource Cts { get; init; } = new();
+        public Task? LoopTask { get; set; }
     }
+
+    public void StartCameraLoop(string cameraKey)
+    {
+        lock (_lock)
+        {
+            var camera = AppHelper.GetDevice(cameraKey);
+            if (camera == null)
+            {
+                _logger.Warn($"相机[{cameraKey}]不存在, 无法启动后台解析线程!");
+                return;
+            }
+            if (_cameraLoops.TryGetValue(cameraKey, out var ctx))
+            {
+                if (ctx.LoopTask is { IsCompleted: false })
+                {
+                    _logger.Info($"{camera}后台解析线程已在运行中, 无需重复启动!");
+                    return;
+                }
+            }
+
+            _logger.Info($"{camera}后台解析线程准备启动!");
+
+            var cts = new CancellationTokenSource();
+
+            if (!LatestReceiveFrameIndex.TryAdd(camera.DeviceAlias, 0))
+            {
+                LatestReceiveFrameIndex[camera.DeviceAlias] = 0;
+            }
+
+            var task = Task.Run(() => CameraParseLoop(camera, cts.Token), cts.Token);
+
+            _cameraLoops[cameraKey] = new CameraLoopContext { Cts = cts, LoopTask = task };
+        }
+    }
+
+    private async Task CameraParseLoop(XmeyeCamera camera, CancellationToken token)
+    {
+        _logger.Info($"{camera}后台解析线程已启动!");
+
+        try
+        {
+            var channel = AppHelper.FFmpegDecodeManager.GetOrCreate(
+                camera.DeviceAlias,
+                new DecodeChannelOptions { CodecId = camera.AVCodeID }
+            );
+            const string consumerName = "UI";
+            AppHelper.AddFrameUpdated(
+                camera.DeviceAlias,
+                consumerName,
+                decodeFrame =>
+                {
+                    //_logger.Info($"{camera}进入{consumerName}处理!");
+                    AppHelper.Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            AppHelper.EnsureWriteableBitmap(decodeFrame, ref _currentAFrame);
+                            //_logger.Info($"保证WriteableBitmap!");
+                            AppHelper.ConvertToWriteableBitmap(decodeFrame, _currentAFrame);
+                            //_logger.Info($"解析WriteableBitmap!");
+                            OnPropertyChanged(nameof(CurrentAFrame));
+                            //_logger.Info($"完成更新CurrentAFrame!");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Error(ex, $"未完成更新{nameof(CurrentAFrame)}");
+                        }
+                    });
+                }
+            );
+
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(10, token);
+
+                var currentLatestFrame = camera.LatestFrame?.AddRef();
+                if (currentLatestFrame == null)
+                {
+                    continue;
+                }
+
+                #region 处理 Frame
+
+                try
+                {
+                    if (currentLatestFrame.ReceiveFrameIndex == LatestReceiveFrameIndex[camera.DeviceAlias])
+                    {
+                        continue;
+                    }
+
+                    //在这里处理帧数据
+                    _logger.Debug(
+                        $"{camera}后台解析线程处理帧数据[{currentLatestFrame.ReceiveAt:hhmmss_fff}({currentLatestFrame.ReceiveFrameIndex})]:"
+                            + $" 类型={currentLatestFrame.PacketType}, 大小={currentLatestFrame.PacketSize}"
+                    );
+
+                    LatestReceiveFrameIndex[camera.DeviceAlias] = currentLatestFrame.ReceiveFrameIndex;
+                    //if (currentLatestFrame.PacketType == MEDIA_PACK_TYPE.VIDEO_I_FRAME)
+                    {
+                        channel.PushPacket(
+                            currentLatestFrame.Buffer,
+                            currentLatestFrame.PacketType == MEDIA_PACK_TYPE.VIDEO_I_FRAME
+                        );
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, $"{camera}后台解析线程处理帧数据时发生异常!");
+                }
+                finally
+                {
+                    currentLatestFrame.Release();
+                }
+
+                #endregion
+
+                #region 处理关键帧
+
+                var currentLatestIFrame = camera.LatestIFrame?.AddRef();
+                if (currentLatestIFrame == null)
+                {
+                    continue;
+                }
+                try
+                {
+                    //在这里处理关键帧数据
+                    _logger.Debug(
+                        $"{camera}后台解析线程处理帧数据: 类型={currentLatestIFrame.PacketType}, 大小={currentLatestIFrame.PacketSize}"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, $"{camera}后台解析线程处理关键帧数据时发生异常!");
+                }
+                finally
+                {
+                    currentLatestIFrame.Release();
+                }
+
+                #endregion
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.Info($"{camera}后台解析线程收到停止信号!");
+        }
+        catch (Exception ex)
+        {
+            _logger.Error(ex, $"{camera}后台解析线程异常退出!");
+        }
+        finally
+        {
+            _logger.Info($"{camera}后台解析线程已结束!");
+        }
+    }
+
+    public async Task StopCameraLoopAsync(XmeyeCamera camera)
+    {
+        CameraLoopContext? ctx;
+
+        lock (_lock)
+        {
+            if (!_cameraLoops.TryGetValue(camera.DeviceAlias, out ctx))
+                return;
+        }
+
+        _logger.Info($"{camera}后台解析线程准备停止!");
+
+        await ctx.Cts.CancelAsync();
+
+        try
+        {
+            if (ctx.LoopTask != null)
+                await ctx.LoopTask;
+        }
+        finally
+        {
+            lock (_lock)
+            {
+                _cameraLoops.Remove(camera.DeviceAlias);
+            }
+
+            ctx.Cts.Dispose();
+            _logger.Info($"{camera}后台解析线程已完全停止!");
+        }
+    }
+
+    #endregion
 }

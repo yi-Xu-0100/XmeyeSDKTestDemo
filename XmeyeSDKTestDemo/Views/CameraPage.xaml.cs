@@ -17,6 +17,11 @@ public partial class CameraPage
         _logger = logger;
         InitializeComponent();
         Unloaded += CameraPage_Unloaded;
+        Loaded += CameraPage_Loaded;
+    }
+    private void CameraPage_Loaded(object sender, RoutedEventArgs e)
+    {
+        _logger.Info($"打开相机后台解析线程!");
     }
 
     private void CameraPage_Unloaded(object sender, RoutedEventArgs e)

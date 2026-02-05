@@ -1,7 +1,6 @@
 using System.Windows;
 using Microsoft.Extensions.Logging;
 using Moyu.LogExtensions.LogHelpers;
-using Wpf.Ui;
 using Wpf.Ui.Appearance;
 using XmeyeSDKTestDemo.Helpers;
 using XmeyeSDKTestDemo.ViewModels;
@@ -27,6 +26,24 @@ public partial class MainWindow
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         _logger.Info($"{nameof(MainWindow)} 加载完成!");
+
+        #region 注册相机组件
+
+        if (
+            AppHelper.TryAddDevice(
+                new("相机A", "192.168.1.10") { AVCodeID = FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_HEVC }
+            )
+        )
+        {
+            _logger.Info("成功添加相机A!");
+        }
+        //if (AppHelper.TryAddDevice(new("相机B", "192.168.1.11") { AVCodeID = FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_HEVC }))
+        //{
+        //    _logger.Info("成功添加相机B!");
+        //}
+
+        #endregion
+
         AppHelper.NavigateTo<CameraPage>();
     }
 

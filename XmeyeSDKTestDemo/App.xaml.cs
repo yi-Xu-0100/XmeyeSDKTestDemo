@@ -1,6 +1,7 @@
 using System.Data;
 using System.IO;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,10 @@ using NLog.Web;
 using Wpf.Ui;
 using Wpf.Ui.DependencyInjection;
 using XmeyeSDKTestDemo.Helpers;
+using XmeyeSDKTestDemo.Interfaces;
+using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Models.PixelConverters;
+using XmeyeSDKTestDemo.Services;
 using XmeyeSDKTestDemo.ViewModels;
 using XmeyeSDKTestDemo.Views;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
@@ -144,6 +149,18 @@ public partial class App : Application
                     );
 
                     services.AddSingleton(_ => Current.Dispatcher);
+
+                    services.AddSingleton<XmeyeHostService>();
+                    services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<XmeyeHostService>());
+
+                    services.AddSingleton<IFFmpegDecodeManager, FFmpegDecodeManager>();
+
+                    services.AddSingleton(sp =>
+                    {
+                        return new PixelConverterDispatcher<WriteableBitmap>([new BgraWriteableBitmapConverter()]);
+                    });
+
+
                 }
             );
     }
