@@ -16,6 +16,7 @@ public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegiste
     private readonly List<FrameConsumerWorker> _consumers = [];
 
     private AVCodecContext* _codecCtx;
+    private readonly IPacketGate _gate;
     private readonly CancellationTokenSource _cts = new();
 
     public IFrameConsumerRegister Consumers => this;
@@ -38,7 +39,12 @@ public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegiste
             string msg = Marshal.PtrToStringAnsi((IntPtr)errBuf) ?? "Unknown error";
             throw new InvalidOperationException($"avcodec_open2 failed: {msg}");
         }
-
+        _gate = options.CodecId switch
+        {
+            AVCodecID.AV_CODEC_ID_H264 => new H264PacketGate(),
+            AVCodecID.AV_CODEC_ID_HEVC => new H265PacketGate(),
+            _ => throw new NotSupportedException(),
+        };
         _logger.Info(
             $"初始化了通道[{channelId}]的解码器[{options.CodecId}],"
                 + $" {nameof(options.PacketQueueSize)}:{options.PacketQueueSize},"
@@ -53,6 +59,8 @@ public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegiste
 
     public void PushPacket(ReadOnlySpan<byte> data, bool isKeyFrame)
     {
+        if (!_gate.TryAccept(data, isKeyFrame))
+            return;
         if (_packetQueue.Count >= _packetQueue.BoundedCapacity)
             return; // 永不阻塞回调
 
@@ -98,7 +106,7 @@ public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegiste
                         while (!_cts.IsCancellationRequested)
                         {
                             int ret = ffmpeg.avcodec_receive_frame(_codecCtx, frame);
-                            //_logger.Info($"通道[{ChannelId}]解析线程接收包[{ret}]!");
+                            //_logger.Info($"通道[{ChannelId}]({GetHashCode()})解析线程接收包[{ret}]!");
                             if (ret == 0)
                             {
                                 var decoded = DecodedFrame.From(frame);

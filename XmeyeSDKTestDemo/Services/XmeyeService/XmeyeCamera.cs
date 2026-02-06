@@ -128,10 +128,11 @@ public partial class XmeyeCamera : ObservableObject
 
     public fRealDataCallBack_V2 FRealDataCallBack { get; set; } = null!;
 
-    public XmeyeCamera(string deviceAlias, string ip)
+    public XmeyeCamera(string deviceAlias, string ip, AVCodecID codecID)
     {
         DeviceAlias = deviceAlias;
         DeviceIP = ip;
+        AVCodeID = codecID;
         DeviceInfo = new H264_DVR_DEVICEINFO();
     }
 

@@ -29,18 +29,14 @@ public partial class MainWindow
 
         #region 注册相机组件
 
-        if (
-            AppHelper.TryAddDevice(
-                new("相机A", "192.168.1.10") { AVCodeID = FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_HEVC }
-            )
-        )
+        if (AppHelper.TryAddDevice(new("相机A", "192.168.1.10", FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_HEVC)))
         {
             _logger.Info("成功添加相机A!");
         }
-        //if (AppHelper.TryAddDevice(new("相机B", "192.168.1.11") { AVCodeID = FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_HEVC }))
-        //{
-        //    _logger.Info("成功添加相机B!");
-        //}
+        if (AppHelper.TryAddDevice(new("相机B", "192.168.1.11", FFmpeg.AutoGen.AVCodecID.AV_CODEC_ID_H264)))
+        {
+            _logger.Info("成功添加相机B!");
+        }
 
         #endregion
 

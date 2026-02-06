@@ -129,6 +129,7 @@ public partial class CameraPageViewModel : ViewModelBase
                 camera.DeviceAlias,
                 new DecodeChannelOptions { CodecId = camera.AVCodeID }
             );
+            _logger.Info($"{camera}拿到解析通道[{channel.ChannelId}:{camera.AVCodeID}]");
             const string consumerName = "UI";
             AppHelper.AddFrameUpdated(
                 camera.DeviceAlias,
@@ -177,7 +178,7 @@ public partial class CameraPageViewModel : ViewModelBase
                     //在这里处理帧数据
                     _logger.Debug(
                         $"{camera}后台解析线程处理帧数据[{currentLatestFrame.ReceiveAt:hhmmss_fff}({currentLatestFrame.ReceiveFrameIndex})]:"
-                            + $" 类型={currentLatestFrame.PacketType}, 大小={currentLatestFrame.PacketSize}"
+                            + $" 类型={currentLatestFrame.PacketType}[{currentLatestFrame.EncodeType}], 大小={currentLatestFrame.PacketSize}"
                     );
 
                     LatestReceiveFrameIndex[camera.DeviceAlias] = currentLatestFrame.ReceiveFrameIndex;
