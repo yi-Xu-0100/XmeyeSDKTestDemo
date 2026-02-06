@@ -1,6 +1,6 @@
 using User.NetSDK;
 
-namespace XmeyeSDKTestDemo.Models;
+namespace XmeyeSDKTestDemo.Services.XmeyeService;
 
 public sealed class XmeyeFrame
 {
@@ -98,13 +98,30 @@ public sealed class XmeyeFrame
 
     public DateTimeOffset ReceiveAt { get; set; } = DateTimeOffset.Now;
 
-    public void Reset(int size)
+    public void Reset(int size, PACKET_INFO_EX pFrame, long index)
     {
         if (Buffer.Length < size)
             Buffer = new byte[size];
 
         Length = size;
         _refCount = 1; // 初始持有者
+        PacketType = pFrame.nPacketType;
+        PacketSize = pFrame.dwPacketSize;
+        EncodeType = pFrame.nEncodeType;
+        Year = pFrame.nYear;
+        Month = pFrame.nMonth;
+        Day = pFrame.nDay;
+        Hour = pFrame.nHour;
+        Minute = pFrame.nMinute;
+        Second = pFrame.nSecond;
+        TimeStamp = pFrame.dwTimeStamp;
+        TimeStampHigh = pFrame.dwTimeStampHigh;
+        FrameNum = pFrame.dwFrameNum;
+        FrameRate = pFrame.dwFrameRate;
+        Width = pFrame.uWidth;
+        Height = pFrame.uHeight;
+        ReceiveFrameIndex = index;
+        ReceiveAt = DateTimeOffset.Now;
     }
 
     public XmeyeFrame AddRef()

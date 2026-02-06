@@ -12,8 +12,6 @@ public sealed class FFmpegDecodeManager : IFFmpegDecodeManager
     {
         ffmpeg.RootPath = "./Services/DecodeService/";
         ffmpeg.av_log_set_level(ffmpeg.AV_LOG_ERROR);
-        //_ctxH264 = CreateDecoder(AVCodecID.AV_CODEC_ID_H264);
-        //_ctxH265 = CreateDecoder(AVCodecID.AV_CODEC_ID_HEVC);
     }
 
     public IDecodeChannel GetOrCreate(string channelId, DecodeChannelOptions options)

@@ -14,48 +14,56 @@ public partial class XmeyeHostService : IHostedService, IDisposable
     public async Task ConnectLoopAsync(CancellationToken ctsToken)
     {
         logger.Info("启动设备连接状态监测循环任务!");
-        while (!ctsToken.IsCancellationRequested)
+        try
         {
-            await Task.Delay(100, ctsToken);
-
-            foreach ((string _, XmeyeCamera Device) in DeviceDic)
+            while (!ctsToken.IsCancellationRequested)
             {
-                if (Device.LoginId >= 0)
-                {
-                    continue;
-                }
-                logger.Warn($"{Device}状态异常, 等待重新连接!");
-                try
-                {
-                    H264_DVR_DEVICEINFO outDev = new();
-                    outDev.Init();
-                    int lLogin = H264_DVR_Login(
-                        Device.DeviceIP,
-                        Device.DevicePort,
-                        Device.LoginName,
-                        Device.Password,
-                        ref outDev,
-                        out int nError,
-                        SocketStyle.TCPSOCKET
-                    );
+                await Task.Delay(100, ctsToken);
 
-                    if (lLogin <= 0)
+
+                foreach ((string _, XmeyeCamera Device) in DeviceDic)
+                {
+                    if (Device.LoginId >= 0)
                     {
-                        logger.Error($"{Device}重新连接过程中异常: {CameraDvrError(nError)}");
                         continue;
                     }
+                    logger.Warn($"{Device}状态异常, 等待重新连接!");
+                    try
+                    {
+                        H264_DVR_DEVICEINFO outDev = new();
+                        outDev.Init();
+                        int lLogin = H264_DVR_Login(
+                            Device.DeviceIP,
+                            Device.DevicePort,
+                            Device.LoginName,
+                            Device.Password,
+                            ref outDev,
+                            out int nError,
+                            SocketStyle.TCPSOCKET
+                        );
 
-                    Device.LoginId = lLogin;
-                    Device.DeviceInfo = outDev;
-                    logger.Info($"{Device}重新连接成功!");
+                        if (lLogin <= 0)
+                        {
+                            logger.Error($"{Device}重新连接过程中异常: {CameraDvrError(nError)}");
+                            continue;
+                        }
 
-                    OpenRealPlay(Device);
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex, $"{Device}重新连接过程中异常!");
+                        Device.LoginId = lLogin;
+                        Device.DeviceInfo = outDev;
+                        logger.Info($"{Device}重新连接成功!");
+
+                        OpenRealPlay(Device);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Error(ex, $"{Device}重新连接过程中异常!");
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            logger.Error(ex, $"{nameof(XmeyeHostService)}相机重连循环异常退出!");
         }
         return;
     }

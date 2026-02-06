@@ -27,14 +27,6 @@ public partial class CameraPageViewModel : ViewModelBase
         _logger = logger;
     }
 
-    private System.Windows.Media.ImageSource currentAResultFrame;
-
-    public System.Windows.Media.ImageSource CurrentAResultFrame
-    {
-        get => currentAResultFrame;
-        set => SetProperty(ref currentAResultFrame, value);
-    }
-
     private WriteableBitmap _currentAFrame;
 
     public WriteableBitmap CurrentAFrame
@@ -44,6 +36,17 @@ public partial class CameraPageViewModel : ViewModelBase
         {
             SetProperty(ref _currentAFrame, value);
             OnPropertyChanged(nameof(CurrentAFrame));
+        }
+    }
+    private WriteableBitmap _currentBFrame;
+
+    public WriteableBitmap CurrentBFrame
+    {
+        get { return _currentBFrame; }
+        set
+        {
+            SetProperty(ref _currentBFrame, value);
+            OnPropertyChanged(nameof(CurrentBFrame));
         }
     }
 
@@ -67,6 +70,7 @@ public partial class CameraPageViewModel : ViewModelBase
     private void SetACamera()
     {
         StartCameraLoop("相机A");
+        StartCameraLoop("相机B");
     }
 
     private RelayCommand loadAFrameFromFileCommand;
@@ -141,12 +145,24 @@ public partial class CameraPageViewModel : ViewModelBase
                     {
                         try
                         {
-                            AppHelper.EnsureWriteableBitmap(decodeFrame, ref _currentAFrame);
-                            //_logger.Info($"保证WriteableBitmap!");
-                            AppHelper.ConvertToWriteableBitmap(decodeFrame, _currentAFrame);
-                            //_logger.Info($"解析WriteableBitmap!");
-                            OnPropertyChanged(nameof(CurrentAFrame));
-                            //_logger.Info($"完成更新CurrentAFrame!");
+                            if (camera.DeviceAlias == "相机A")
+                            {
+                                AppHelper.EnsureWriteableBitmap(decodeFrame, ref _currentAFrame);
+                                //_logger.Info($"保证WriteableBitmap!");
+                                AppHelper.ConvertToWriteableBitmap(decodeFrame, _currentAFrame);
+                                //_logger.Info($"解析WriteableBitmap!");
+                                OnPropertyChanged(nameof(CurrentAFrame));
+                                //_logger.Info($"完成更新CurrentAFrame!");
+                            }
+                            else
+                            {
+                                AppHelper.EnsureWriteableBitmap(decodeFrame, ref _currentBFrame);
+                                //_logger.Info($"保证WriteableBitmap!");
+                                AppHelper.ConvertToWriteableBitmap(decodeFrame, _currentBFrame);
+                                //_logger.Info($"解析WriteableBitmap!");
+                                OnPropertyChanged(nameof(CurrentBFrame));
+                                //_logger.Info($"完成更新CurrentAFrame!");
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -197,31 +213,6 @@ public partial class CameraPageViewModel : ViewModelBase
                 finally
                 {
                     currentLatestFrame.Release();
-                }
-
-                #endregion
-
-                #region 处理关键帧
-
-                var currentLatestIFrame = camera.LatestIFrame?.AddRef();
-                if (currentLatestIFrame == null)
-                {
-                    continue;
-                }
-                try
-                {
-                    //在这里处理关键帧数据
-                    _logger.Debug(
-                        $"{camera}后台解析线程处理帧数据: 类型={currentLatestIFrame.PacketType}, 大小={currentLatestIFrame.PacketSize}"
-                    );
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, $"{camera}后台解析线程处理关键帧数据时发生异常!");
-                }
-                finally
-                {
-                    currentLatestIFrame.Release();
                 }
 
                 #endregion

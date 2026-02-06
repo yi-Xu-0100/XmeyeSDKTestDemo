@@ -20,7 +20,7 @@ internal sealed class FrameConsumerWorker
         Task.Run(ConsumeLoop);
     }
 
-    public void TryPost(DecodedFrame frame)
+    public void Post(DecodedFrame frame)
     {
         //_logger.Info($"frame[{frame.PixelFormat}]准备推送消费者[{Name}]!");
         if (!_queue.TryAdd(frame))

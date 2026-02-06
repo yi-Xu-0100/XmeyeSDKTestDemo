@@ -1,25 +1,25 @@
 using XmeyeSDKTestDemo.Interfaces;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 public sealed class H264PacketGate : IPacketGate
 {
-    private bool hasSps;
-    private bool hasPps;
-    private bool ready;
+    private bool _hasSps;
+    private bool _hasPps;
+    private bool _ready;
 
     public bool TryAccept(ReadOnlySpan<byte> data, bool externalKeyFlag)
     {
         ScanNal(data, out bool sps, out bool pps, out bool idr);
 
-        hasSps |= sps;
-        hasPps |= pps;
+        _hasSps |= sps;
+        _hasPps |= pps;
 
-        if (!ready)
+        if (!_ready)
         {
-            if (hasSps && hasPps && (idr || externalKeyFlag))
+            if (_hasSps && _hasPps && (idr || externalKeyFlag))
             {
-                ready = true;
+                _ready = true;
                 return true;
             }
             return false;

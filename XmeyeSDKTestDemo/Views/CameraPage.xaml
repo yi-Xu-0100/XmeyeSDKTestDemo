@@ -45,7 +45,7 @@
             <Image Grid.Column="1"
                    MinHeight="300"
                    MaxHeight="600"
-                   Source="{Binding CurrentAResultFrame}"
+                   Source="{Binding CurrentBFrame}"
                    Stretch="Uniform" />
 
           </Grid>

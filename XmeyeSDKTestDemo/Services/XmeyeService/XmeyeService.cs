@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using FFmpeg.AutoGen;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moyu.LogExtensions.LogHelpers;
@@ -15,12 +14,13 @@ public partial class XmeyeHostService(ILogger<XmeyeHostService> logger) : IHoste
     private fDisConnect? _disCallback;
     private bool _disposed;
     public bool IsRunning { get; private set; }
-    public Dictionary<string, XmeyeCamera> DeviceDic { get; set; } = [];
+    public ConcurrentDictionary<string, XmeyeCamera> DeviceDic { get; set; } = [];
 
     public ConcurrentDictionary<
         string,
         ConcurrentDictionary<string, Action<DecodedFrame>?>
-    > FrameUpdatedDic { get; set; } = [];
+    > FrameUpdatedDic
+    { get; set; } = [];
 
     #region Start Stop
 

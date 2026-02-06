@@ -17,7 +17,7 @@ public sealed unsafe class BgraWriteableBitmapConverter : SwScalePixelConverter<
             bmp = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgra32, null);
         }
     }
-    
+
     public override bool CanConvert(DecodedFrame frame) => frame.Frame != null;
 
     protected override void AllocateTargetBuffer(

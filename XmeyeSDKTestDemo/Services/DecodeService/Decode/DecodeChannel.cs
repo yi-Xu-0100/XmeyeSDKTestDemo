@@ -4,7 +4,7 @@ using FFmpeg.AutoGen;
 using NLog;
 using XmeyeSDKTestDemo.Interfaces;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegister
 {
@@ -183,7 +183,7 @@ public sealed unsafe class DecodeChannel : IDecodeChannel, IFrameConsumerRegiste
                         {
                             var clone = frame.Clone();
                             //_logger.Info($"通道[{ChannelId}]分发帧[{clone.PixelFormat}]给消费者[{consumer.Name}]!");
-                            consumer.TryPost(clone);
+                            consumer.Post(clone);
                         }
                     }
                     catch (Exception ex)

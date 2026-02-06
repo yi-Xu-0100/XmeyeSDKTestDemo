@@ -1,7 +1,6 @@
 using FFmpeg.AutoGen;
-using Wpf.Ui.Controls;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 public sealed unsafe class DecodedFrame : IDisposable
 {
