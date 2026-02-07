@@ -2,9 +2,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using FFmpeg.AutoGen;
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
-namespace XmeyeSDKTestDemo.Models.PixelConverters;
+namespace XmeyeSDKTestDemo.Services.DecodeService.PixelConverters;
 
 public sealed unsafe class BgraWriteableBitmapConverter : SwScalePixelConverter<WriteableBitmap>
 {

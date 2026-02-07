@@ -1,7 +1,7 @@
 using XmeyeSDKTestDemo.Interfaces;
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
-namespace XmeyeSDKTestDemo.Models.PixelConverters;
+namespace XmeyeSDKTestDemo.Services.DecodeService.PixelConverters;
 
 public sealed class PixelConverterDispatcher<TOutput>
 {

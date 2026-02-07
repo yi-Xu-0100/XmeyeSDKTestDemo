@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using FFmpeg.AutoGen;
 using XmeyeSDKTestDemo.Interfaces;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 public sealed class FFmpegDecodeManager : IFFmpegDecodeManager
 {

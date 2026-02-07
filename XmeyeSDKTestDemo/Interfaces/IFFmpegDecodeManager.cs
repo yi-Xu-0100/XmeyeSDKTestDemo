@@ -1,4 +1,4 @@
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 namespace XmeyeSDKTestDemo.Interfaces;
 

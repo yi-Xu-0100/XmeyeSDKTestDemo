@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace XmeyeSDKTestDemo.Models;
+namespace XmeyeSDKTestDemo.Services.XmeyeService;
 
 public static class XmeyeFramePool
 {

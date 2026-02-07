@@ -1,8 +1,8 @@
 using FFmpeg.AutoGen;
 using XmeyeSDKTestDemo.Interfaces;
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
-namespace XmeyeSDKTestDemo.Models.PixelConverters;
+namespace XmeyeSDKTestDemo.Services.DecodeService.PixelConverters;
 
 public abstract unsafe class SwScalePixelConverter<TOutput> : IPixelConverter<TOutput>, IDisposable
 {

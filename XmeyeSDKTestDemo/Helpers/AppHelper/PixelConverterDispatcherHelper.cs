@@ -1,6 +1,6 @@
 using System.Windows.Media.Imaging;
-using XmeyeSDKTestDemo.Models.Decode;
-using XmeyeSDKTestDemo.Models.PixelConverters;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.PixelConverters;
 
 namespace XmeyeSDKTestDemo.Helpers;
 

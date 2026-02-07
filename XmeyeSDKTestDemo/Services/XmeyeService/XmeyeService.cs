@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moyu.LogExtensions.LogHelpers;
 using User.NetSDK;
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 using XmeyeSDKTestDemo.XmeyeService;
 using static User.NetSDK.NetSDK;
 

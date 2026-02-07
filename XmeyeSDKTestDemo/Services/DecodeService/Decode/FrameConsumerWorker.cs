@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using NLog;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 internal sealed class FrameConsumerWorker
 {

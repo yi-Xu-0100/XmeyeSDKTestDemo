@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FFmpeg.AutoGen;
 using User.NetSDK;
-using XmeyeSDKTestDemo.Models;
+using XmeyeSDKTestDemo.Services.XmeyeService;
 using static User.NetSDK.NetSDK;
 
 namespace XmeyeSDKTestDemo.XmeyeService;

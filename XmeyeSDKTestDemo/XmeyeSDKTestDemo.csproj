@@ -85,4 +85,8 @@
     <PackageReference Include="ValueConverters" Version="3.1.22" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

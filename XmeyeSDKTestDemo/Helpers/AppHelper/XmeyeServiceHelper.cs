@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Channels;
 using System.Windows.Media.Media3D;
 using NLog;
-using XmeyeSDKTestDemo.Models.Decode;
 using XmeyeSDKTestDemo.Services;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 using XmeyeSDKTestDemo.XmeyeService;
 
 namespace XmeyeSDKTestDemo.Helpers;

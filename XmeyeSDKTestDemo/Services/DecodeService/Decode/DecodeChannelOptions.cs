@@ -1,6 +1,6 @@
 using FFmpeg.AutoGen;
 
-namespace XmeyeSDKTestDemo.Models.Decode;
+namespace XmeyeSDKTestDemo.Services.DecodeService.Decode;
 
 public sealed class DecodeChannelOptions
 {

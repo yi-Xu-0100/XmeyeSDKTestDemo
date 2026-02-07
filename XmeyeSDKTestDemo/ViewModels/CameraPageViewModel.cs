@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moyu.LogExtensions.LogHelpers;
 using User.NetSDK;
 using XmeyeSDKTestDemo.Helpers;
-using XmeyeSDKTestDemo.Models.Decode;
+using XmeyeSDKTestDemo.Services.DecodeService.Decode;
 using XmeyeSDKTestDemo.XmeyeService;
 
 namespace XmeyeSDKTestDemo.ViewModels;
